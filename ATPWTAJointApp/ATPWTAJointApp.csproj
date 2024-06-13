@@ -1,0 +1,90 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFrameworks>net8.0-android;net8.0-ios</TargetFrameworks>
+		<OutputType>Exe</OutputType>
+		<RootNamespace>ATPWTAJointApp</RootNamespace>
+		<UseMaui>true</UseMaui>
+		<SingleProject>true</SingleProject>
+		<ImplicitUsings>enable</ImplicitUsings>
+
+		<!-- Display name -->
+		<ApplicationTitle>TourTestApp</ApplicationTitle>
+
+		<!-- App Identifier -->
+		<ApplicationId>com.atptour.test</ApplicationId>
+		<ApplicationIdGuid>5a36d2e1-7292-452a-b701-ffd234b62650</ApplicationIdGuid>
+
+		<!-- Versions -->
+		<ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+		<ApplicationVersion>1</ApplicationVersion>
+
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">12.0</SupportedOSPlatformVersion>
+		<SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">23.0</SupportedOSPlatformVersion>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<!-- App Icon -->
+		<MauiIcon Include="Resources\AppIcon\appicon.svg" ForegroundFile="Resources\AppIcon\appiconfg.svg" Color="#512BD4" />
+
+		<!-- Splash Screen -->
+		<MauiSplashScreen Include="Resources\Splash\splash.svg" Color="#512BD4" BaseSize="128,128" />
+
+		<!-- Images -->
+		<MauiImage Include="Resources\Images\*" />
+		<MauiImage Update="Resources\Images\dotnet_bot.svg" BaseSize="168,208" />
+
+		<!-- Custom Fonts -->
+		<MauiFont Include="Resources\Fonts\*" />
+
+		<!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
+		<MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<ItemGroup>
+        <PackageReference Include="Microsoft.Maui.Controls" Version="8.0.21" />
+		<PackageReference Include="Plugin.Firebase.Core" Version="3.0.0" />
+		<PackageReference Include="Plugin.Firebase.Analytics" Version="3.0.0" />
+		<PackageReference Include="Plugin.Firebase.CloudMessaging" Version="3.0.0" />
+	</ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-ios'">
+    	<PackageReference Include="System.Runtime.InteropServices.NFloat.Internal" Version="6.0.1" />
+		<PackageReference Include="AdamE.Firebase.iOS.Analytics" Version="10.24.0.2" />
+		<PackageReference Include="AdamE.Firebase.iOS.CloudMessaging" Version="10.24.0.2" />
+		<PackageReference Include="AdamE.Firebase.iOS.Core" Version="10.24.0.2" />
+		<PackageReference Include="AdamE.Firebase.iOS.Installations" Version="10.24.0.2" />
+    </ItemGroup>
+
+	<ItemGroup Condition="'$(TargetFramework)' == 'net8.0-android'">
+		<PackageReference Include="Xamarin.Firebase.Analytics" Version="121.3.0.6" />
+		<PackageReference Include="Xamarin.Firebase.Messaging" Version="123.4.1.1" />
+		<PackageReference Include="Xamarin.AndroidX.Collection.Jvm" Version="1.4.0.2" />
+		<PackageReference Include="Xamarin.AndroidX.Collection" Version="1.4.0.3" />
+		<PackageReference Include="Xamarin.AndroidX.Collection.Ktx" Version="1.4.0.2" />
+	</ItemGroup>
+
+	<!-- Target needed until LinkWithSwiftSystemLibraries makes it into the SDK: https://github.com/xamarin/xamarin-macios/pull/20463 -->
+	<Target Name="LinkWithSwift" DependsOnTargets="_ParseBundlerArguments;_DetectSdkLocations" BeforeTargets="_LinkNativeExecutable">
+		<PropertyGroup>
+			<_SwiftPlatform Condition="$(RuntimeIdentifier.StartsWith('iossimulator-'))">iphonesimulator</_SwiftPlatform>
+			<_SwiftPlatform Condition="$(RuntimeIdentifier.StartsWith('ios-'))">iphoneos</_SwiftPlatform>
+		</PropertyGroup>
+		<ItemGroup>
+			<_CustomLinkFlags Include="-L" />
+			<_CustomLinkFlags Include="/usr/lib/swift" />
+			<_CustomLinkFlags Include="-L" />
+			<_CustomLinkFlags Include="$(_SdkDevPath)/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/$(_SwiftPlatform)" />
+			<_CustomLinkFlags Include="-Wl,-rpath" />
+			<_CustomLinkFlags Include="-Wl,/usr/lib/swift" />
+		</ItemGroup>
+	</Target>
+	
+	<PropertyGroup Condition="$(RuntimeIdentifier.StartsWith('iossimulator-'))">
+		<MtouchExtraArgs>--gcc_flags -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphonesimulator/</MtouchExtraArgs>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="$(RuntimeIdentifier.StartsWith('ios-'))">
+		<MtouchExtraArgs>--gcc_flags -L/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/iphoneos</MtouchExtraArgs>
+	</PropertyGroup>
+</Project>
